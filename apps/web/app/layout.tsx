@@ -6,9 +6,9 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import Providers from "./providers";
 
-const title = "Novel - Notion-style WYSIWYG editor with AI-powered autocompletions";
+const title = "Muse";
 const description =
-  "Novel is a Notion-style WYSIWYG editor with AI-powered autocompletions. Built with Tiptap, OpenAI, and Vercel AI SDK.";
+  "Muse is a powerful and flexible note-taking app that helps you organize your thoughts and ideas. With its intuitive interface and advanced features, Muse makes it easy to capture, organize, and share your notes with others.";
 
 export const metadata: Metadata = {
   title,
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title,
     description,
     card: "summary_large_image",
-    creator: "@steventey",
+    creator: "@steven_tey",
   },
   metadataBase: new URL("https://novel.sh"),
 };
