@@ -12,11 +12,29 @@ import {
   TextQuote,
   Twitter,
   Youtube,
+  Sparkles,
 } from "lucide-react";
 import { Command, createSuggestionItems, renderItems } from "novel";
 import { uploadFn } from "./image-upload";
 
 export const suggestionItems = createSuggestionItems([
+  {
+    title: "AI Assistant",
+    description: "Ask AI for help with your note",
+    searchTerms: ["ai", "assistant", "help"],
+    icon: <Sparkles size={18} />,
+    command: ({ editor, range }) => {
+      console.log('[slash-command] AI Assistant command triggered', { editor, range });
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertContent({
+          type: 'aiCommandBlock'
+        })
+        .run();
+    },
+  },
   {
     title: "Send Feedback",
     description: "Let us know how we can improve.",

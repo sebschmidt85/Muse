@@ -13,6 +13,11 @@ import {
   handleCommandNavigation,
   handleImageDrop,
   handleImagePaste,
+  Command,
+  createSuggestionItems,
+  renderItems,
+  EditorBubble,
+  useEditor,
 } from "novel";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -27,13 +32,30 @@ import GenerativeMenuSwitch from "./generative/generative-menu-switch";
 import { uploadFn } from "./image-upload";
 import { TextButtons } from "./selectors/text-buttons";
 import { slashCommand, suggestionItems } from "./slash-command";
+import { BookOpen } from "lucide-react";
+import { Node } from '@tiptap/core';
+import { ReactNodeViewRenderer } from '@tiptap/react';
+import { Button } from "./ui/button";
+import { Play } from "lucide-react";
+import { AICommandBlock as AICommandBlockNode } from './ai-command-block';
 
 const hljs = require("highlight.js");
 
-const extensions = [...defaultExtensions, slashCommand];
+const extensions = [
+  ...defaultExtensions,
+  slashCommand,
+  AICommandBlockNode,
+];
 
-const TailwindAdvancedEditor = () => {
-  const [initialContent, setInitialContent] = useState<null | JSONContent>(null);
+// Add prop type for initialContent
+interface TailwindAdvancedEditorProps {
+  initialContent?: any;
+  onContentChange?: (content: any) => void;
+}
+
+// Accept initialContent as a prop
+const TailwindAdvancedEditor = ({ initialContent, onContentChange }: TailwindAdvancedEditorProps) => {
+  const [editorContent, setEditorContent] = useState<null | any>(null);
   const [saveStatus, setSaveStatus] = useState("Saved");
   const [charsCount, setCharsCount] = useState();
 
@@ -41,6 +63,7 @@ const TailwindAdvancedEditor = () => {
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   //Apply Codeblock Highlighting on the HTML from editor.getHTML()
   const highlightCodeblocks = (content: string) => {
@@ -60,15 +83,20 @@ const TailwindAdvancedEditor = () => {
     window.localStorage.setItem("novel-content", JSON.stringify(json));
     window.localStorage.setItem("markdown", editor.storage.markdown.getMarkdown());
     setSaveStatus("Saved");
+    if (onContentChange) onContentChange(json);
   }, 500);
 
   useEffect(() => {
-    const content = window.localStorage.getItem("novel-content");
-    if (content) setInitialContent(JSON.parse(content));
-    else setInitialContent(defaultEditorContent);
-  }, []);
+    if (initialContent) {
+      setEditorContent(initialContent);
+    } else {
+      const content = window.localStorage.getItem("novel-content");
+      if (content) setEditorContent(JSON.parse(content));
+      else setEditorContent(defaultEditorContent);
+    }
+  }, [initialContent]);
 
-  if (!initialContent) return null;
+  if (!editorContent) return null;
 
   return (
     <div className="relative w-full max-w-screen-lg">
@@ -80,13 +108,10 @@ const TailwindAdvancedEditor = () => {
       </div>
       <EditorRoot>
         <EditorContent
-          initialContent={initialContent}
+          initialContent={editorContent}
           extensions={extensions}
           className="relative min-h-[500px] w-full max-w-screen-lg border-muted bg-background sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:shadow-lg"
           editorProps={{
-            handleDOMEvents: {
-              keydown: (_view, event) => handleCommandNavigation(event),
-            },
             handlePaste: (view, event) => handleImagePaste(view, event, uploadFn),
             handleDrop: (view, event, _slice, moved) => handleImageDrop(view, event, moved, uploadFn),
             attributes: {
@@ -106,7 +131,7 @@ const TailwindAdvancedEditor = () => {
               {suggestionItems.map((item) => (
                 <EditorCommandItem
                   value={item.title}
-                  onCommand={(val) => item.command(val)}
+                  onCommand={(val) => item.command(val as unknown as { editor: EditorInstance; range: any })}
                   className="flex w-full items-center space-x-2 rounded-md px-2 py-1 text-left text-sm hover:bg-accent aria-selected:bg-accent"
                   key={item.title}
                 >
@@ -137,6 +162,11 @@ const TailwindAdvancedEditor = () => {
           </GenerativeMenuSwitch>
         </EditorContent>
       </EditorRoot>
+      {isAiLoading && (
+        <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
     </div>
   );
 };
