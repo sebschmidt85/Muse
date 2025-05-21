@@ -67,6 +67,23 @@ const AICommandBlockComponent = (props) => {
       }
 
       setAnswer(data.response);
+      // Insert the question and the AI answer into the editor, both marked as AI
+      props.editor
+        .chain()
+        .focus()
+        .insertContent([
+          {
+            type: 'text',
+            text: 'Q: ' + value + '\n',
+            marks: [{ type: 'ai-highlight', attrs: { color: '#2563eb' } }], // darker blue for question
+          },
+          {
+            type: 'text',
+            text: 'A: ' + data.response + '\n',
+            marks: [{ type: 'ai-highlight', attrs: { color: '#3b82f6' } }], // lighter blue for answer
+          },
+        ])
+        .run();
     } catch (error) {
       console.error('[AICommandBlockComponent] AI command error:', error);
       setAnswer('Error: Failed to get AI response. Please try again.');
