@@ -55,7 +55,7 @@ export default function Page() {
           if (data.length > 0) {
             // Deduplicate notes by id
             const uniqueNotes = Array.from(
-              new Map(data.map((note: any) => [note.id, note])).values()
+              new Map(data.map((note: { id: string; title: string; content: any; isShared?: boolean; user?: { name: string | null; email: string } }) => [note.id, note])).values()
             );
             setEditors(
               uniqueNotes.map((note: any) => ({
@@ -159,7 +159,7 @@ export default function Page() {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen font-sans">
       {/* Sidebar */}
       <Sidebar
         editors={editors}
@@ -172,11 +172,6 @@ export default function Page() {
         {/* Top Bar */}
         <div className="flex w-full max-w-screen-lg items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <Button size="icon" variant="outline">
-              <a href="https://github.com/steven-tey/novel" target="_blank" rel="noreferrer">
-                <GithubIcon />
-              </a>
-            </Button>
             <Button size="icon" variant="outline" onClick={() => signOut({ callbackUrl: "/login" })}>
               <LogOut className="h-4 w-4" />
             </Button>
@@ -196,37 +191,35 @@ export default function Page() {
         </div>
 
         {/* Writing Area for Selected Note */}
-        <div className="flex flex-col w-full max-w-screen-lg gap-4 px-4">
+        <div className="w-full max-w-screen-lg mx-auto px-4">
           {editors
             .filter((editor) => editor.id === selectedNoteId)
-            .map((editor) => {
-              console.log('[EditorRender] noteId:', editor.id, 'currentUserId:', session.user.id, 'isOwner:', !editor.isShared, 'isShared:', editor.isShared, 'editor.user:', editor.user);
-              return (
-                <div key={editor.id} className="border p-4 rounded-md shadow">
-                  <div className="flex items-center justify-between mb-4">
-                    <input
-                      className="text-lg font-bold bg-transparent outline-none border-b border-muted focus:border-blue-400 transition-colors"
-                      value={editor.title || ''}
-                      placeholder={`Note ${editor.id}`}
-                      onChange={e => handleTitleChange(editor.id, e.target.value)}
-                    />
-                    {!editor.isShared && <ShareNoteButton noteId={editor.id} />}
-                  </div>
-                  {editor.isShared && (
-                    <div className="text-sm text-muted-foreground mb-4">
-                      Shared by {editor.user?.name || editor.user?.email}
-                    </div>
-                  )}
-                  <TailwindAdvancedEditor
-                    key={editor.id}
-                    initialContent={editor.content}
-                    onContentChange={(newContent) => handleContentChange(editor.id, newContent)}
-                    currentUserId={session.user.id}
-                    isOwner={!editor.isShared}
+            .map((editor: Editor) => (
+              <div key={editor.id}>
+                <div className="prose mx-auto mb-4 flex items-center justify-between max-w-prose">
+                  <input
+                    className="text-4xl font-extrabold bg-transparent outline-none border-b-2 border-muted focus:border-blue-400 transition-colors py-2 w-full text-[#F4F4FA]"
+                    value={editor.title || ''}
+                    placeholder={`Note ${editor.id}`}
+                    onChange={e => handleTitleChange(editor.id, e.target.value)}
+                    style={{ letterSpacing: '-0.02em' }}
                   />
+                  {!editor.isShared && <ShareNoteButton noteId={editor.id} />}
                 </div>
-              );
-            })}
+                {editor.isShared && (
+                  <div className="text-sm text-muted-foreground mb-4">
+                    Shared by {editor.user?.name || editor.user?.email}
+                  </div>
+                )}
+                <TailwindAdvancedEditor
+                  key={editor.id}
+                  initialContent={editor.content}
+                  onContentChange={(newContent) => handleContentChange(editor.id, newContent)}
+                  currentUserId={session.user.id}
+                  isOwner={!editor.isShared}
+                />
+              </div>
+            ))}
         </div>
       </div>
     </div>
