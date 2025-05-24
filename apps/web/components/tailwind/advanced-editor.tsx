@@ -19,7 +19,7 @@ import {
   EditorBubble,
   useEditor,
 } from "novel";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { defaultExtensions } from "./extensions";
 import { ColorSelector } from "./selectors/color-selector";
@@ -38,32 +38,53 @@ import { ReactNodeViewRenderer } from '@tiptap/react';
 import { Button } from "./ui/button";
 import { Play } from "lucide-react";
 import { AICommandBlock as AICommandBlockNode } from './ai-command-block';
+import { AuthorMark } from './extensions/author-mark';
+import { AuthorAutoMark } from './extensions/author-auto-mark';
 
 const hljs = require("highlight.js");
-
-const extensions = [
-  ...defaultExtensions,
-  slashCommand,
-  AICommandBlockNode,
-];
 
 // Add prop type for initialContent
 interface TailwindAdvancedEditorProps {
   initialContent?: any;
   onContentChange?: (content: any) => void;
+  currentUserId: string;
+  isOwner: boolean;
+}
+
+// Utility function for robust author comparison
+export function isOwnText(authorAttr: string | null, userId: string | null): boolean {
+  const clean = (val: string | null) => (val ?? '').replace(/^[\s"']+|[\s"']+$/g, '');
+  const a = clean(authorAttr);
+  const u = clean(userId);
+  const result = a === u;
+  if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+    console.log('[isOwnText DEBUG]', { authorAttr, userId, cleanedAuthor: a, cleanedUser: u, result });
+  }
+  return result;
 }
 
 // Accept initialContent as a prop
-const TailwindAdvancedEditor = ({ initialContent, onContentChange }: TailwindAdvancedEditorProps) => {
+const TailwindAdvancedEditor = ({ initialContent, onContentChange, currentUserId, isOwner }: TailwindAdvancedEditorProps) => {
   const [editorContent, setEditorContent] = useState<null | any>(null);
   const [saveStatus, setSaveStatus] = useState("Saved");
   const [charsCount, setCharsCount] = useState();
+  const [editorUpdateCount, setEditorUpdateCount] = useState(0);
 
   const [openNode, setOpenNode] = useState(false);
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
+
+  const extensions = [
+    ...defaultExtensions,
+    slashCommand,
+    AICommandBlockNode,
+    AuthorMark.configure({ currentUserId }),
+    AuthorAutoMark.configure({ currentUserId, isOwner }),
+  ];
+
+  const editorRootRef = useRef<HTMLDivElement>(null);
 
   //Apply Codeblock Highlighting on the HTML from editor.getHTML()
   const highlightCodeblocks = (content: string) => {
@@ -99,7 +120,7 @@ const TailwindAdvancedEditor = ({ initialContent, onContentChange }: TailwindAdv
   if (!editorContent) return null;
 
   return (
-    <div className="relative w-full max-w-screen-lg">
+    <div className="relative w-full max-w-screen-lg" ref={editorRootRef}>
       <div className="flex absolute right-5 top-5 z-10 mb-5 gap-2">
         <div className="rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground">{saveStatus}</div>
         <div className={charsCount ? "rounded-lg bg-accent px-2 py-1 text-sm text-muted-foreground" : "hidden"}>
@@ -117,11 +138,14 @@ const TailwindAdvancedEditor = ({ initialContent, onContentChange }: TailwindAdv
             attributes: {
               class:
                 "prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full",
+              'data-current-user-id': currentUserId,
+              style: `--current-user-id: ${currentUserId};`,
             },
           }}
           onUpdate={({ editor }) => {
             debouncedUpdates(editor);
             setSaveStatus("Unsaved");
+            setEditorUpdateCount((c) => c + 1);
           }}
           slotAfter={<ImageResizer />}
         >
@@ -172,3 +196,26 @@ const TailwindAdvancedEditor = ({ initialContent, onContentChange }: TailwindAdv
 };
 
 export default TailwindAdvancedEditor;
+
+// --- TEST HARNESS ---
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+  const testCases = [
+    { author: 'abc', user: 'abc', expected: true },
+    { author: 'abc', user: 'def', expected: false },
+    { author: '"abc"', user: 'abc', expected: true },
+    { author: 'abc', user: '"abc"', expected: true },
+    { author: ' "abc" ', user: 'abc', expected: true },
+    { author: 'abc ', user: 'abc', expected: true },
+    { author: null, user: 'abc', expected: false },
+    { author: 'abc', user: null, expected: false },
+    { author: '', user: '', expected: true },
+  ];
+  testCases.forEach(({ author, user, expected }, i) => {
+    const result = isOwnText(author, user);
+    if (result !== expected) {
+      console.error(`[isOwnText TEST FAIL] Case ${i}: author='${author}' user='${user}' expected=${expected} got=${result}`);
+    } else {
+      console.log(`[isOwnText TEST PASS] Case ${i}`);
+    }
+  });
+}

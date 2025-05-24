@@ -1,5 +1,6 @@
 .ProseMirror {
   @apply p-12 px-8 sm:px-12;
+  color: #fff !important;
 }
 
 .ProseMirror .is-editor-empty:first-child::before {
@@ -239,4 +240,22 @@ mark[style] > strong {
 
 .ai-command-block:hover::after {
   opacity: 1;
+}
+
+/* Author-based coloring for shared notes */
+/* .ProseMirror span[data-author] {
+  color: #2563eb !important; 
+}
+.ProseMirror span[data-author].is-own-text {
+  color: #fff !important; 
+  background: #000 !important; 
+} */
+
+/* Dynamically set --current-user-id on the ProseMirror root via JS for comparison */
+
+.ProseMirror [class^="author-"] {
+  color: #2563eb !important; /* blue for others */
+}
+.ProseMirror .author-__CURRENT_USER__ {
+  color: #fff !important; /* white for current user */
 }

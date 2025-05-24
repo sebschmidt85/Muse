@@ -53,8 +53,12 @@ export default function Page() {
         .then((res) => res.json())
         .then((data) => {
           if (data.length > 0) {
+            // Deduplicate notes by id
+            const uniqueNotes = Array.from(
+              new Map(data.map((note: any) => [note.id, note])).values()
+            );
             setEditors(
-              data.map((note: any) => ({
+              uniqueNotes.map((note: any) => ({
                 id: note.id,
                 title: note.title || '',
                 content: note.content,
@@ -62,7 +66,7 @@ export default function Page() {
                 user: note.user,
               }))
             );
-            setSelectedNoteId(data[0].id);
+            setSelectedNoteId(uniqueNotes[0].id);
           }
         })
         .catch((error) => {
@@ -195,28 +199,34 @@ export default function Page() {
         <div className="flex flex-col w-full max-w-screen-lg gap-4 px-4">
           {editors
             .filter((editor) => editor.id === selectedNoteId)
-            .map((editor) => (
-              <div key={editor.id} className="border p-4 rounded-md shadow">
-                <div className="flex items-center justify-between mb-4">
-                  <input
-                    className="text-lg font-bold bg-transparent outline-none border-b border-muted focus:border-blue-400 transition-colors"
-                    value={editor.title || ''}
-                    placeholder={`Note ${editor.id}`}
-                    onChange={e => handleTitleChange(editor.id, e.target.value)}
-                  />
-                  {!editor.isShared && <ShareNoteButton noteId={editor.id} />}
-                </div>
-                {editor.isShared && (
-                  <div className="text-sm text-muted-foreground mb-4">
-                    Shared by {editor.user?.name || editor.user?.email}
+            .map((editor) => {
+              console.log('[EditorRender] noteId:', editor.id, 'currentUserId:', session.user.id, 'isOwner:', !editor.isShared, 'isShared:', editor.isShared, 'editor.user:', editor.user);
+              return (
+                <div key={editor.id} className="border p-4 rounded-md shadow">
+                  <div className="flex items-center justify-between mb-4">
+                    <input
+                      className="text-lg font-bold bg-transparent outline-none border-b border-muted focus:border-blue-400 transition-colors"
+                      value={editor.title || ''}
+                      placeholder={`Note ${editor.id}`}
+                      onChange={e => handleTitleChange(editor.id, e.target.value)}
+                    />
+                    {!editor.isShared && <ShareNoteButton noteId={editor.id} />}
                   </div>
-                )}
-                <TailwindAdvancedEditor
-                  initialContent={editor.content}
-                  onContentChange={(newContent) => handleContentChange(editor.id, newContent)}
-                />
-              </div>
-            ))}
+                  {editor.isShared && (
+                    <div className="text-sm text-muted-foreground mb-4">
+                      Shared by {editor.user?.name || editor.user?.email}
+                    </div>
+                  )}
+                  <TailwindAdvancedEditor
+                    key={editor.id}
+                    initialContent={editor.content}
+                    onContentChange={(newContent) => handleContentChange(editor.id, newContent)}
+                    currentUserId={session.user.id}
+                    isOwner={!editor.isShared}
+                  />
+                </div>
+              );
+            })}
         </div>
       </div>
     </div>

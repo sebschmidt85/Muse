@@ -58,9 +58,12 @@ export async function GET() {
     ]);
 
     // Add a flag to distinguish between owned and shared notes
+    // Filter out shared notes where the user is also the owner
+    const ownedNoteIds = new Set(ownedNotes.map(note => note.id));
+    const filteredSharedNotes = sharedNotes.filter(sharedNote => !ownedNoteIds.has(sharedNote.note.id));
     const notes = [
       ...ownedNotes.map(note => ({ ...note, isShared: false })),
-      ...sharedNotes.map(sharedNote => ({ 
+      ...filteredSharedNotes.map(sharedNote => ({ 
         ...sharedNote.note, 
         isShared: true,
         user: sharedNote.note.user,
