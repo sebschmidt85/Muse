@@ -95,3 +95,10 @@ build/
 .DS_Store
 .env
 .env.local
+
+# Python project files
+pyproject.toml
+requirements.txt
+src/
+train.py
+train_script.py
