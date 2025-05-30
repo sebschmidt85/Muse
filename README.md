@@ -1,104 +1,115 @@
-<a href="https://novel.sh">
-  <img alt="Novel is a Notion-style WYSIWYG editor with AI-powered autocompletions." src="https://novel.sh/opengraph-image.png">
-  <h1 align="center">Novel</h1>
-</a>
+# Influenser
 
-<p align="center">
-  An open-source Notion-style WYSIWYG editor with AI-powered autocompletions. 
-</p>
+A Python package for training and using LoRA models to create virtual influencers using Stable Diffusion.
 
-<p align="center">
-  <a href="https://news.ycombinator.com/item?id=36360789"><img src="https://img.shields.io/badge/Hacker%20News-369-%23FF6600" alt="Hacker News"></a>
-  <a href="https://github.com/steven-tey/novel/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/steven-tey/novel?label=license&logo=github&color=f80&logoColor=fff" alt="License" />
-  </a>
-  <a href="https://github.com/steven-tey/novel"><img src="https://img.shields.io/github/stars/steven-tey/novel?style=social" alt="Novel.sh's GitHub repo"></a>
-</p>
+## Features
 
-<p align="center">
-  <a href="#introduction"><strong>Introduction</strong></a> ·
-  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
-  <a href="#setting-up-locally"><strong>Setting Up Locally</strong></a> ·
-  <a href="#tech-stack"><strong>Tech Stack</strong></a> ·
-  <a href="#contributing"><strong>Contributing</strong></a> ·
-  <a href="#license"><strong>License</strong></a>
-</p>
-<br/>
+- Train LoRA models on custom images using DreamBooth method
+- Generate images using trained LoRA models
+- Support for both CPU (M1 Mac) and GPU (CUDA) training
+- Automatic mixed precision training
+- Checkpoint saving and resuming
+- Customizable training parameters
+- Easy-to-use API
 
-## Docs (WIP)
+## Setup
 
-https://novel.sh/docs/introduction
-
-## Introduction
-
-[Novel](https://novel.sh/) is a Notion-style WYSIWYG editor with AI-powered autocompletions.
-
-https://github.com/steven-tey/novel/assets/28986134/2099877f-4f2b-4b1c-8782-5d803d63be5c
-
-<br />
-
-## Deploy Your Own
-
-You can deploy your own version of Novel to Vercel with one click:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://stey.me/novel-deploy)
-
-## Setting Up Locally
-
-To set up Novel locally, you'll need to clone the repository and set up the following environment variables:
-
-- `OPENAI_API_KEY` – your OpenAI API key (you can get one [here](https://platform.openai.com/account/api-keys))
-- `BLOB_READ_WRITE_TOKEN` – your Vercel Blob read/write token (currently [still in beta](https://vercel.com/docs/storage/vercel-blob/quickstart#quickstart), but feel free to [sign up on this form](https://vercel.fyi/blob-beta) for access)
-
-If you've deployed this to Vercel, you can also use [`vc env pull`](https://vercel.com/docs/cli/env#exporting-development-environment-variables) to pull the environment variables from your Vercel project.
-
-To run the app locally, you can run the following commands:
-
-```
-pnpm i
-pnpm dev
+1. Create and activate a virtual environment:
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Unix/macOS
+# or
+.\venv\Scripts\activate  # On Windows
 ```
 
-## Cross-framework support
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-While Novel is built for React, we also have a few community-maintained packages for non-React frameworks:
+## Usage
 
-- Svelte: https://novel.sh/svelte
-- Vue: https://novel.sh/vue
+### Training
 
-## VSCode Extension
+1. Prepare your training images:
+   - Place your training images in a directory (e.g., `data/training_images/`)
+   - Images should be in JPG format
+   - Recommended: 10-20 high-quality images of the same person
 
-Thanks to @bennykok, Novel also has a VSCode Extension: https://novel.sh/vscode
+2. Run the training:
+```python
+from influenser.lora_pipeline import train_lora
 
-https://github.com/steven-tey/novel/assets/28986134/58ebf7e3-cdb3-43df-878b-119e304f7373
+train_lora(
+    instance_data_dir="data/training_images",
+    output_dir="outputs",
+    instance_prompt="a photo of sks person",  # Unique identifier
+    num_train_epochs=100,
+    train_batch_size=1,
+    learning_rate=1e-4,
+    mixed_precision="fp16",  # Use fp16 for faster training on GPU
+    gradient_accumulation_steps=4,
+)
+```
 
-## Tech Stack
+### Generation
 
-Novel is built on the following stack:
+After training, generate images using the trained model:
 
-- [Next.js](https://nextjs.org/) – framework
-- [Tiptap](https://tiptap.dev/) – text editor
-- [OpenAI](https://openai.com/) - AI completions
-- [Vercel AI SDK](https://sdk.vercel.ai/docs) – AI library
-- [Vercel](https://vercel.com) – deployments
-- [TailwindCSS](https://tailwindcss.com/) – styles
-- [Cal Sans](https://github.com/calcom/font) – font
+```python
+from influenser.lora_pipeline import generate_image
 
-## Contributing
+generate_image(
+    prompt="a photo of sks person in a garden",
+    lora_weights_path="outputs/final",
+    output_path="outputs/generated_image.png",
+    height=512,
+    width=512,
+    num_inference_steps=50,
+    guidance_scale=7.5,
+    seed=42,  # Fixed seed for reproducibility
+)
+```
 
-Here's how you can contribute:
+### Example Script
 
-- [Open an issue](https://github.com/steven-tey/novel/issues) if you believe you've encountered a bug.
-- Make a [pull request](https://github.com/steven-tey/novel/pull) to add new features/make quality-of-life improvements/fix bugs.
+A complete example is provided in `src/influenser/example.py`. Run it with:
 
-<a href="https://github.com/steven-tey/novel/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=steven-tey/novel" />
-</a>
+```bash
+python -m influenser.example
+```
 
-## Repo Activity
+## Configuration
 
-![Novel.sh repo activity – generated by Axiom](https://repobeats.axiom.co/api/embed/2ebdaa143b0ad6e7c2ee23151da7b37f67da0b36.svg)
+### Training Parameters
+
+- `instance_data_dir`: Directory containing training images
+- `output_dir`: Directory to save the trained model
+- `instance_prompt`: Unique identifier for the person (e.g., "a photo of sks person")
+- `num_train_epochs`: Number of training epochs
+- `train_batch_size`: Training batch size
+- `learning_rate`: Learning rate
+- `mixed_precision`: Mixed precision training type ("no", "fp16", "bf16")
+- `gradient_accumulation_steps`: Number of steps for gradient accumulation
+
+### Generation Parameters
+
+- `prompt`: Text prompt for generation
+- `lora_weights_path`: Path to the trained LoRA weights
+- `output_path`: Path to save the generated image
+- `height`: Image height
+- `width`: Image width
+- `num_inference_steps`: Number of denoising steps
+- `guidance_scale`: Guidance scale
+- `seed`: Random seed for reproducibility
+
+## Hardware Requirements
+
+- GPU (recommended): NVIDIA GPU with CUDA support
+- CPU: M1 Mac or equivalent
+- RAM: 16GB minimum (32GB recommended)
+- Storage: 10GB minimum for model weights and training data
 
 ## License
 
-Licensed under the [Apache-2.0 license](https://github.com/steven-tey/novel/blob/main/LICENSE).
+MIT License
