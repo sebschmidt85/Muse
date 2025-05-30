@@ -22,20 +22,20 @@ export default function Sidebar({ editors, selectedNoteId, setSelectedNoteId }: 
   const sharedNotes = editors.filter(editor => editor.isShared);
 
   return (
-    <div className="w-64 bg-gray-100 dark:bg-gray-900 h-full p-4 shadow-md">
+    <div className="w-64 bg-gray-100 dark:bg-gray-900 h-full p-4 shadow-lg rounded-md font-sans">
       <h2 className="text-lg font-bold mb-4">Notes</h2>
       
       {/* Owned Notes */}
       {ownedNotes.length > 0 && (
         <div className="mb-6">
           <h3 className="text-sm font-medium text-muted-foreground mb-2">My Notes</h3>
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {ownedNotes.map((editor) => (
               <li
                 key={editor.id}
                 className={`p-2 rounded-md shadow-sm cursor-pointer transition-colors
                   ${selectedNoteId === editor.id
-                    ? "bg-blue-500 text-white dark:bg-blue-400"
+                    ? "bg-blue-500 text-white dark:bg-blue-400 font-bold"
                     : "bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"}
                 `}
                 onClick={() => setSelectedNoteId(editor.id)}
@@ -51,13 +51,13 @@ export default function Sidebar({ editors, selectedNoteId, setSelectedNoteId }: 
       {sharedNotes.length > 0 && (
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-2">Shared with Me</h3>
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {sharedNotes.map((editor) => (
               <li
                 key={editor.id}
                 className={`p-2 rounded-md shadow-sm cursor-pointer transition-colors
                   ${selectedNoteId === editor.id
-                    ? "bg-blue-500 text-white dark:bg-blue-400"
+                    ? "bg-blue-500 text-white dark:bg-blue-400 font-bold"
                     : "bg-white dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"}
                 `}
                 onClick={() => setSelectedNoteId(editor.id)}

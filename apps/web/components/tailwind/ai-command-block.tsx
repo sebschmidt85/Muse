@@ -93,28 +93,27 @@ const AICommandBlockComponent = (props) => {
   };
 
   return (
-    <NodeViewWrapper className="ai-command-block bg-white border border-stone-200 rounded-lg shadow-sm overflow-hidden">
-      <div className="flex flex-col gap-0 p-0">
+    <NodeViewWrapper className="ai-command-block bg-[#18182a] border border-border rounded-xl p-6 overflow-hidden">
+      <div className="flex flex-col gap-0">
         <textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
           disabled={isProcessing}
           placeholder="Ask the AI anything..."
-          className="w-full min-h-[64px] resize-none rounded-t-lg border-0 bg-stone-50 px-4 py-3 text-base text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/10 transition disabled:opacity-60 font-sans"
+          className="w-full min-h-[64px] resize-none rounded-lg border-0 bg-background text-text p-3 text-base focus:outline-none focus:ring-2 focus:ring-accent/30 transition disabled:opacity-60 font-sans"
         />
-        <div className="flex justify-end px-4 pb-3 pt-1">
+        <div className="flex justify-end pt-3">
           <Button
             size="sm"
-            className="flex items-center gap-1 bg-stone-100 text-stone-700 border border-stone-300 shadow-none hover:bg-stone-200 hover:text-primary transition rounded-md px-3 py-1.5 text-sm font-medium"
+            className="bg-accent text-white rounded-full px-5 py-2 font-semibold hover:bg-accent/80 transition shadow-none border border-border flex items-center gap-1"
             onClick={handleRun}
             disabled={isProcessing}
             style={{ boxShadow: 'none' }}
           >
             {isProcessing ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-stone-400"></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
             ) : (
               <>
-                <Play className="h-4 w-4 mr-1" />
                 Run
               </>
             )}
@@ -122,9 +121,9 @@ const AICommandBlockComponent = (props) => {
         </div>
         {answer && (
           <>
-            <div className="border-t border-stone-200" />
-            <div className="bg-stone-50 px-4 py-4 text-base text-stone-800 font-sans rounded-b-lg">
-              <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-stone-400">AI Answer</div>
+            <div className="border-t border-border my-2" />
+            <div className="bg-background px-4 py-4 text-base text-text font-sans rounded-b-lg">
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-text-muted">AI Answer</div>
               <div className="whitespace-pre-line leading-relaxed">{answer}</div>
             </div>
           </>

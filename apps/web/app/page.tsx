@@ -12,6 +12,13 @@ import { BookOpen, GithubIcon, LogOut } from "lucide-react";
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import ShareNoteButton from "@/components/ShareNoteButton";
+import SearchButton from "@/components/SearchButton";
+
+interface SessionUser {
+  id: string;
+  name?: string | null;
+  email: string;
+}
 
 interface Editor {
   id: string;
@@ -48,6 +55,7 @@ export default function Page() {
 
   useEffect(() => {
     if (session?.user) {
+      const user = session.user as SessionUser;
       // Fetch notes from the database
       fetch("/api/notes")
         .then((res) => res.json())
@@ -177,16 +185,19 @@ export default function Page() {
             </Button>
           </div>
           <div>
-            {/* Button to Add New Writing Area */}
-            <Button 
-              variant="default" 
-              onClick={() => {
-                console.log('New Note button clicked');
-                addEditor();
-              }}
-            >
-              New Note
-            </Button>
+            {/* Search and New Note buttons */}
+            <div className="flex items-center gap-2">
+              <SearchButton />
+              <Button 
+                variant="default" 
+                onClick={() => {
+                  console.log('New Note button clicked');
+                  addEditor();
+                }}
+              >
+                New Note
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -215,7 +226,7 @@ export default function Page() {
                   key={editor.id}
                   initialContent={editor.content}
                   onContentChange={(newContent) => handleContentChange(editor.id, newContent)}
-                  currentUserId={session.user.id}
+                  currentUserId={(session.user as SessionUser).id}
                   isOwner={!editor.isShared}
                 />
               </div>

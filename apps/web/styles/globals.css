@@ -2,10 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+Pro:wght@400;700&display=swap');
+
+html, body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+}
+
+.font-serif {
+  font-family: 'Source Serif Pro', Georgia, Cambria, 'Times New Roman', Times, serif;
+}
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: #0C0C1E;
+    --foreground: #ECECF1;
+    --text: #ECECF1;
+    --text-muted: #999FB3;
+    --accent: #7B6EF6;
+    --success: #3CCF91;
+    --border: #1E1F33;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -22,13 +37,9 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
@@ -46,8 +57,13 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: #0C0C1E;
+    --foreground: #ECECF1;
+    --text: #ECECF1;
+    --text-muted: #999FB3;
+    --accent: #7B6EF6;
+    --success: #3CCF91;
+    --border: #1E1F33;
 
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
@@ -64,13 +80,9 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
 
